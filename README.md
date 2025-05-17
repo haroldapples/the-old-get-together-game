@@ -1,44 +1,61 @@
 # The Old Get Together
 
-A 90s-style side-scrolling game inspired by classic Konami titles like Turtles in Time and Sunset Riders.
+A 2D platformer game built with Phaser 3, featuring a rooster's adventure through a festival with multiple levels, enemies, and boss fights.
 
-## Setup
+## Game Features
 
-1. Install dependencies:
+- Multiple levels with unique challenges
+- Boss fights with unique mechanics
+- Collectible items and score system
+- Responsive controls and smooth animations
+- Original soundtrack and sound effects
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v12 or higher)
+- npm (comes with Node.js)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone [your-repository-url]
+```
+
+2. Navigate to the project directory:
+```bash
+cd [your-repository-name]
+```
+
+3. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Start the development server:
+4. Start the development server:
 ```bash
 npm start
 ```
 
-3. Open your browser and navigate to `http://localhost:8080`
+5. Open your browser and navigate to `http://localhost:3000`
 
-## Game Controls
-- Left Arrow: Move left
-- Right Arrow: Move right
-- Spacebar: Jump
+## How to Play
 
-## Game Features
-- Classic 90s-style pixel art graphics
-- Original soundtrack
-- Side-scrolling gameplay
-- Multiple enemy types
-- Boss battle
-- Authentic retro sound effects
+- Use arrow keys to move left and right
+- Press spacebar to jump
+- Defeat enemies by jumping on them
+- Collect hearts to restore health
+- Reach the end of each level to progress
+- Face off against unique bosses
 
-## Project Structure
-```
-├── src/
-│   ├── scenes/         # Game scenes (Title, Game, End)
-│   ├── sprites/        # Character and enemy sprites
-│   ├── index.js        # Main game configuration
-│   └── index.html      # HTML template
-├── Assets/             # Game assets (music, images)
-└── dist/              # Built files (generated)
-```
+## Built With
 
-## Development
-The game is built using Phaser 3 and modern JavaScript. It uses webpack for bundling and development. 
+- [Phaser 3](https://phaser.io/) - HTML5 Game Framework
+- JavaScript/ES6
+- Webpack for bundling
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details 

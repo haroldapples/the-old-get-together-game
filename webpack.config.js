@@ -1,46 +1,55 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.js',
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(png|svg|jpg|gif|mp3)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'assets/'
-            }
-          }
-        ]
-      }
-    ]
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/index.html',
-      filename: 'index.html'
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'Assets', to: 'assets' }
-      ]
-    })
-  ],
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+        publicPath: '/',
+        clean: true
     },
-    compress: true,
-    port: 8080,
-    hot: true
-  }
+    mode: 'development',
+    devServer: {
+        static: {
+            directory: path.join(__dirname, './'),
+        },
+        port: 3000,
+        open: true,
+        hot: true,
+        liveReload: true,
+        client: {
+            overlay: {
+                errors: true,
+                warnings: false
+            },
+            progress: true
+        },
+        headers: {
+            "Content-Security-Policy": "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net; object-src 'self'"
+        }
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(png|jpg|gif|mp3)$/i,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/[name][ext]'
+                }
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                }
+            }
+        ]
+    },
+    performance: {
+        hints: false
+    }
 }; 

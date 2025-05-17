@@ -1,66 +1,183 @@
 export default class TitleScene extends Phaser.Scene {
     constructor() {
         super({ key: 'TitleScene' });
+        this.isTransitioning = false;
     }
 
     preload() {
-        // Load character sprites
-        this.load.image('hero-idle', 'assets/hero 1.png');
-        this.load.spritesheet('hero-walk', 'assets/herowalking.png', {
-            frameWidth: 44,
-            frameHeight: 48
+        // Add loading text
+        this.loadingText = this.add.text(400, 300, 'Loading...', {
+            fontSize: '32px',
+            fill: '#fff',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+
+        // Show loading progress
+        this.load.on('progress', (value) => {
+            this.loadingText.setText(`Loading... ${Math.round(value * 100)}%`);
         });
-        
-        // Load logo
-        this.load.image('logo', 'assets/Logo.png');
-        
-        // Load music
-        this.load.audio('soundtrack', 'assets/Soundtrack.mp3');
+
+        try {
+            this.load.image('title', 'assets/title.png');
+            this.load.audio('intro', 'assets/intro.mp3');
+        } catch (error) {
+            console.error('Error in preload:', error);
+            this.loadingText.setText('Error loading assets. Retrying...');
+            this.scene.restart();
+        }
+
+        // Remove loading text when complete
+        this.load.on('complete', () => {
+            if (this.loadingText) {
+                this.loadingText.destroy();
+            }
+        });
     }
 
     create() {
-        // Add logo
-        const logo = this.add.image(this.cameras.main.centerX, 200, 'logo');
-        logo.setScale(0.5);
-        
-        // Add "Press Start" text
-        const pressStart = this.add.text(
-            this.cameras.main.centerX,
-            400,
-            'Press SPACE to Start',
-            {
-                fontSize: '32px',
-                fill: '#fff'
+        try {
+            // Create a simple title screen if image isn't available
+            let titleScreen;
+            if (this.textures.exists('title')) {
+                titleScreen = this.add.image(400, 300, 'title');
+                titleScreen.setDisplaySize(800, 600);
+            } else {
+                // Create a text-based title if image isn't available
+                this.add.text(400, 200, 'The Old Get Together', {
+                    fontSize: '48px',
+                    fill: '#fff',
+                    fontFamily: 'Arial',
+                    align: 'center'
+                }).setOrigin(0.5);
             }
-        ).setOrigin(0.5);
 
-        // Make text blink
-        this.tweens.add({
-            targets: pressStart,
-            alpha: 0,
-            duration: 800,
-            ease: 'Power2',
-            yoyo: true,
-            repeat: -1
-        });
+            // Add and play intro music with error handling
+            try {
+                this.introMusic = this.sound.add('intro', {
+                    loop: true,
+                    volume: 0.7
+                });
 
-        // Start game on spacebar press
-        this.input.keyboard.once('keydown-SPACE', () => {
-            this.sound.play('soundtrack', { loop: true });
-            this.scene.start('GameScene');
-        });
+                // Play intro music when audio is ready
+                if (this.sound.locked) {
+                    this.sound.once('unlocked', () => {
+                        this.playIntroMusic();
+                    });
+                } else {
+                    this.playIntroMusic();
+                }
+            } catch (error) {
+                console.error('Error setting up audio:', error);
+                // Continue without music
+            }
 
-        // Create walking animation
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNumbers('hero-walk', { start: 0, end: 3 }),
-            frameRate: 8,
-            repeat: -1
-        });
+            // Add start text at bottom of the screen
+            this.startText = this.add.text(400, 500, 'Press SPACE to Start', {
+                fontSize: '24px',
+                fill: '#fff',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
 
-        // Add demo character
-        const hero = this.add.sprite(700, 500, 'hero-idle');
-        hero.setScale(2);
-        hero.play('walk');
+            // Make text blink
+            this.tweens.add({
+                targets: this.startText,
+                alpha: 0,
+                duration: 800,
+                ease: 'Power2',
+                yoyo: true,
+                repeat: -1
+            });
+
+            // Set up space key
+            this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+            this.canStart = true;
+
+        } catch (error) {
+            console.error('Error in create:', error);
+            // Show error message to user
+            this.add.text(400, 300, 'Error loading title screen\nPress SPACE to retry', {
+                fontSize: '24px',
+                fill: '#fff',
+                fontFamily: 'Arial',
+                align: 'center'
+            }).setOrigin(0.5);
+
+            this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+            this.canStart = true;
+        }
+    }
+
+    update() {
+        if (this.canStart && this.spaceKey && this.spaceKey.isDown) {
+            this.canStart = false;  // Prevent multiple transitions
+            this.handleSceneTransition();
+        }
+    }
+
+    playIntroMusic() {
+        try {
+            if (this.introMusic && !this.introMusic.isPlaying) {
+                this.introMusic.play();
+            }
+        } catch (error) {
+            console.error('Error playing intro music:', error);
+        }
+    }
+
+    handleSceneTransition() {
+        if (this.isTransitioning) return;
+        this.isTransitioning = true;
+
+        try {
+            // Fade out intro music if it exists
+            if (this.introMusic && this.introMusic.isPlaying) {
+                this.tweens.add({
+                    targets: this.introMusic,
+                    volume: 0,
+                    duration: 1000,
+                    onComplete: () => {
+                        this.introMusic.stop();
+                        this.startGameScene();
+                    }
+                });
+            } else {
+                // If no music is playing, just transition
+                this.startGameScene();
+            }
+        } catch (error) {
+            console.error('Error during scene transition:', error);
+            // Fallback transition
+            this.startGameScene();
+        }
+    }
+
+    startGameScene() {
+        try {
+            this.scene.start('GameScene', { startMusic: true });
+        } catch (error) {
+            console.error('Error starting game scene:', error);
+            this.isTransitioning = false;
+        }
+    }
+
+    shutdown() {
+        try {
+            // Clean up all resources
+            this.isTransitioning = false;
+            this.canStart = false;
+            
+            if (this.introMusic && this.introMusic.isPlaying) {
+                this.introMusic.stop();
+            }
+            
+            // Remove all event listeners
+            this.input.keyboard.shutdown();
+            
+            // Stop all tweens
+            this.tweens.killAll();
+            
+        } catch (error) {
+            console.error('Error during shutdown:', error);
+        }
     }
 } 

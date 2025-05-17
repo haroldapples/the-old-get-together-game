@@ -2,32 +2,69 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob:; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:;">
     <title>The Old Get Together</title>
     <style>
         body {
             margin: 0;
             padding: 0;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #000;
         }
         #game {
-            width: 800px;
-            height: 600px;
+            margin: auto;
+        }
+        #error-message {
+            display: none;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
         }
     </style>
-    <!-- Load Phaser from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
-    <!-- Load our game scenes -->
-    <script src="src/scenes/TitleScene.js" type="module"></script>
-    <script src="src/scenes/GameScene.js" type="module"></script>
-    <script src="src/scenes/EndScene.js" type="module"></script>
-    <!-- Load main game configuration -->
-    <script src="src/index.js" type="module"></script>
 </head>
 <body>
     <div id="game"></div>
+    <div id="error-message"></div>
+    <script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = 'An error occurred. Please refresh the page.';
+            errorMessage.style.display = 'block';
+            console.error('Error: ', msg, url, lineNo, columnNo, error);
+            return false;
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <script>
+        // Wait for Phaser to load
+        window.addEventListener('load', function() {
+            // Load the game bundle
+            const script = document.createElement('script');
+            script.src = '/bundle.js';
+            script.onerror = function() {
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = 'Failed to load game. Please refresh the page.';
+                errorMessage.style.display = 'block';
+            };
+            document.body.appendChild(script);
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // Reload the page when it becomes visible again
+                window.location.reload();
+            }
+        });
+    </script>
 </body>
 </html> 
