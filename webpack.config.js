@@ -10,6 +10,9 @@ module.exports = {
         publicPath: '',
         clean: true
     },
+    resolve: {
+        extensions: ['.js']
+    },
     devServer: {
         static: {
             directory: path.join(__dirname, '/'),
@@ -21,13 +24,23 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                }
+            },
+            {
                 test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
                 type: 'asset/resource',
                 generator: {
                     filename: 'assets/[name][ext]'
                 }
             }
-        ],
+        ]
     },
     plugins: [
         new CopyWebpackPlugin({
@@ -53,7 +66,11 @@ module.exports = {
                         ignore: ['**/.DS_Store']
                     }
                 }
-            ],
-        }),
+            ]
+        })
     ],
+    performance: {
+        maxEntrypointSize: 5120000,
+        maxAssetSize: 5120000
+    }
 }; 
