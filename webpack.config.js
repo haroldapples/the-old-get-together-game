@@ -7,7 +7,8 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        clean: true
+        clean: true,
+        assetModuleFilename: 'assets/[name][ext]'
     },
     module: {
         rules: [
@@ -25,7 +26,13 @@ module.exports = {
                 test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
                 type: 'asset/resource',
                 generator: {
-                    filename: 'assets/[name][ext]'
+                    filename: (pathData) => {
+                        // Remove spaces and special characters from filename
+                        const filename = path.basename(pathData.filename)
+                            .replace(/[^a-zA-Z0-9.]/g, '')
+                            .toLowerCase();
+                        return `assets/${filename}`;
+                    }
                 }
             }
         ]
@@ -49,6 +56,13 @@ module.exports = {
                     to: 'assets',
                     globOptions: {
                         ignore: ['**/.DS_Store']
+                    },
+                    transform: (content, path) => {
+                        // Don't transform binary files
+                        if (/\.(png|jpg|jpeg|gif|mp3)$/i.test(path)) {
+                            return content;
+                        }
+                        return content;
                     }
                 }
             ]
