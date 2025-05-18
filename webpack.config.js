@@ -2,24 +2,12 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+    mode: 'production',
     entry: './src/index.js',
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: '',
         clean: true
-    },
-    resolve: {
-        extensions: ['.js']
-    },
-    devServer: {
-        static: {
-            directory: path.join(__dirname, '/'),
-        },
-        compress: true,
-        port: 3000,
-        hot: true
     },
     module: {
         rules: [
@@ -45,9 +33,8 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
-                { 
+                {
                     from: 'index.html',
-                    to: 'index.html',
                     transform(content) {
                         return content
                             .toString()
@@ -57,20 +44,14 @@ module.exports = {
                             .replace(/src="\.\/Assets\//gi, 'src="assets/');
                     }
                 },
-                { 
+                {
                     from: 'Assets',
                     to: 'assets',
-                    noErrorOnMissing: true,
                     globOptions: {
-                        caseSensitiveMatch: false,
                         ignore: ['**/.DS_Store']
                     }
                 }
             ]
         })
-    ],
-    performance: {
-        maxEntrypointSize: 5120000,
-        maxAssetSize: 5120000
-    }
+    ]
 }; 

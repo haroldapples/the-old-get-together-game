@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline' data: blob: https://*.githubusercontent.com; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://*.githubusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.githubusercontent.com; media-src 'self' data: blob: https://*.githubusercontent.com;">
     <title>The Old Get Together</title>
     <style>
         body {
@@ -34,25 +33,7 @@
 <body>
     <div id="game"></div>
     <div id="error-message"></div>
-    <script>
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = 'An error occurred. Please refresh the page.';
-            errorMessage.style.display = 'block';
-            console.error('Error: ', msg, url, lineNo, columnNo, error);
-            return false;
-        };
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
     <script src="bundle.js"></script>
-    <script>
-        // Handle page visibility changes
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-                // Reload the page when it becomes visible again
-                window.location.reload();
-            }
-        });
-    </script>
 </body>
 </html> 
