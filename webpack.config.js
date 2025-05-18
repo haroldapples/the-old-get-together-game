@@ -1,6 +1,14 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+// Function to sanitize filenames
+const sanitizeFilename = (filename) => {
+    return filename
+        .replace(/\s+/g, '') // Remove spaces
+        .replace(/[^a-zA-Z0-9.]/g, '') // Remove special characters
+        .toLowerCase(); // Convert to lowercase
+};
+
 module.exports = {
     mode: 'production',
     entry: './src/index.js',
@@ -27,10 +35,7 @@ module.exports = {
                 type: 'asset/resource',
                 generator: {
                     filename: (pathData) => {
-                        // Remove spaces and special characters from filename
-                        const filename = path.basename(pathData.filename)
-                            .replace(/[^a-zA-Z0-9.]/g, '')
-                            .toLowerCase();
+                        const filename = sanitizeFilename(path.basename(pathData.filename));
                         return `assets/${filename}`;
                     }
                 }
@@ -43,12 +48,22 @@ module.exports = {
                 {
                     from: 'index.html',
                     transform(content) {
-                        return content
-                            .toString()
-                            .replace(/src="\/bundle\.js"/g, 'src="bundle.js"')
-                            .replace(/src="\/Assets\//gi, 'src="assets/')
-                            .replace(/src="Assets\//gi, 'src="assets/')
-                            .replace(/src="\.\/Assets\//gi, 'src="assets/');
+                        let html = content.toString();
+                        // Update all asset references to use the sanitized names
+                        html = html.replace(/src="[^"]+"/g, (match) => {
+                            // Don't modify CDN URLs or bundle.js
+                            if (match.includes('cdn.jsdelivr.net') || match.includes('bundle.js')) {
+                                return match;
+                            }
+                            // Extract filename and sanitize
+                            const filename = match.match(/[^/"]+\.[^"]+$/)?.[0];
+                            if (filename) {
+                                const sanitized = sanitizeFilename(filename);
+                                return `src="assets/${sanitized}"`;
+                            }
+                            return match;
+                        });
+                        return html;
                     }
                 },
                 {
@@ -57,9 +72,13 @@ module.exports = {
                     globOptions: {
                         ignore: ['**/.DS_Store']
                     },
-                    transform: (content, path) => {
+                    transform: (content, absoluteFrom) => {
+                        const filename = path.basename(absoluteFrom);
+                        const sanitized = sanitizeFilename(filename);
+                        const targetPath = path.join('assets', sanitized);
+                        
                         // Don't transform binary files
-                        if (/\.(png|jpg|jpeg|gif|mp3)$/i.test(path)) {
+                        if (/\.(png|jpg|jpeg|gif|mp3)$/i.test(absoluteFrom)) {
                             return content;
                         }
                         return content;
