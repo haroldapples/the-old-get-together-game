@@ -16,7 +16,7 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
-        publicPath: '/000_Video_Game/',
+        publicPath: '/the-old-get-together-game/',
         assetModuleFilename: 'assets/[name][ext]'
     },
     module: {
@@ -50,17 +50,20 @@ module.exports = {
                     from: 'index.html',
                     transform(content) {
                         let html = content.toString();
-                        // Update all asset references to use the sanitized names
+                        // Update all asset references to use the sanitized names and correct public path
                         html = html.replace(/src="[^"]+"/g, (match) => {
-                            // Don't modify CDN URLs or bundle.js
-                            if (match.includes('cdn.jsdelivr.net') || match.includes('bundle.js')) {
+                            // Don't modify CDN URLs
+                            if (match.includes('cdn.jsdelivr.net')) {
                                 return match;
                             }
                             // Extract filename and sanitize
                             const filename = match.match(/[^/"]+\.[^"]+$/)?.[0];
                             if (filename) {
                                 const sanitized = sanitizeFilename(filename);
-                                return `src="assets/${sanitized}"`;
+                                if (filename === 'bundle.js') {
+                                    return `src="/the-old-get-together-game/bundle.js"`;
+                                }
+                                return `src="/the-old-get-together-game/assets/${sanitized}"`;
                             }
                             return match;
                         });
@@ -74,10 +77,6 @@ module.exports = {
                         ignore: ['**/.DS_Store']
                     },
                     transform: (content, absoluteFrom) => {
-                        const filename = path.basename(absoluteFrom);
-                        const sanitized = sanitizeFilename(filename);
-                        const targetPath = path.join('assets', sanitized);
-                        
                         // Don't transform binary files
                         if (/\.(png|jpg|jpeg|gif|mp3)$/i.test(absoluteFrom)) {
                             return content;
