@@ -9,6 +9,10 @@ const sanitizeFilename = (filename) => {
         .toLowerCase(); // Convert to lowercase
 };
 
+// Determine if we're in GitHub Pages environment
+const isGitHubPages = process.env.GITHUB_ACTIONS === 'true';
+const repoName = 'the-old-get-together-game';
+
 module.exports = {
     mode: 'production',
     entry: './src/index.js',
@@ -16,7 +20,7 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
-        publicPath: './',
+        publicPath: isGitHubPages ? `/${repoName}/` : '/',
         assetModuleFilename: 'assets/[name][ext]'
     },
     module: {
@@ -60,10 +64,11 @@ module.exports = {
                             const filename = match.match(/[^/"]+\.[^"]+$/)?.[0];
                             if (filename) {
                                 const sanitized = sanitizeFilename(filename);
+                                const basePath = isGitHubPages ? `/${repoName}/` : '/';
                                 if (filename === 'bundle.js') {
-                                    return `src="./bundle.js"`;
+                                    return `src="${basePath}bundle.js"`;
                                 }
-                                return `src="./assets/${sanitized}"`;
+                                return `src="${basePath}assets/${sanitized}"`;
                             }
                             return match;
                         });
