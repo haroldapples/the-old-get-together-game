@@ -7,7 +7,7 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: ''
+        publicPath: './'
     },
     devServer: {
         static: {
@@ -22,15 +22,33 @@ module.exports = {
             {
                 test: /\.(png|svg|jpg|jpeg|gif|mp3)$/i,
                 type: 'asset/resource',
-            },
+                generator: {
+                    filename: 'assets/[name][ext]'
+                }
+            }
         ],
     },
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
-                { from: 'index.html' },
-                { from: 'Assets', to: 'assets' },
-                { from: 'assets', to: 'assets' }
+                { 
+                    from: 'index.html',
+                    transform(content) {
+                        return content
+                            .toString()
+                            .replace('src="/bundle.js"', 'src="./bundle.js"');
+                    }
+                },
+                { 
+                    from: 'Assets',
+                    to: 'assets',
+                    noErrorOnMissing: true
+                },
+                { 
+                    from: 'assets',
+                    to: 'assets',
+                    noErrorOnMissing: true
+                }
             ],
         }),
     ],

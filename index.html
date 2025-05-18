@@ -44,20 +44,8 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <script src="./bundle.js"></script>
     <script>
-        // Wait for Phaser to load
-        window.addEventListener('load', function() {
-            // Load the game bundle
-            const script = document.createElement('script');
-            script.src = '/bundle.js';
-            script.onerror = function() {
-                const errorMessage = document.getElementById('error-message');
-                errorMessage.textContent = 'Failed to load game. Please refresh the page.';
-                errorMessage.style.display = 'block';
-            };
-            document.body.appendChild(script);
-        });
-
         // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
