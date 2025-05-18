@@ -7,7 +7,8 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: './'
+        publicPath: '/',
+        clean: true
     },
     devServer: {
         static: {
@@ -33,21 +34,22 @@ module.exports = {
             patterns: [
                 { 
                     from: 'index.html',
+                    to: 'index.html',
                     transform(content) {
                         return content
                             .toString()
-                            .replace('src="/bundle.js"', 'src="./bundle.js"');
+                            .replace('src="/bundle.js"', 'src="./bundle.js"')
+                            .replace(/src="\/Assets\//g, 'src="./assets/')
+                            .replace(/src="Assets\//g, 'src="./assets/');
                     }
                 },
                 { 
                     from: 'Assets',
                     to: 'assets',
-                    noErrorOnMissing: true
-                },
-                { 
-                    from: 'assets',
-                    to: 'assets',
-                    noErrorOnMissing: true
+                    noErrorOnMissing: true,
+                    globOptions: {
+                        caseSensitiveMatch: false
+                    }
                 }
             ],
         }),
