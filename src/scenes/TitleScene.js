@@ -18,8 +18,8 @@ export default class TitleScene extends Phaser.Scene {
         });
 
         try {
-            this.load.image('title', 'assets/title.png');
-            this.load.audio('intro', 'assets/intro.mp3');
+            this.load.image('title', 'Assets/title.png');
+            this.load.audio('intro', 'Assets/intro.mp3');
         } catch (error) {
             console.error('Error in preload:', error);
             this.loadingText.setText('Error loading assets. Retrying...');
@@ -75,7 +75,9 @@ export default class TitleScene extends Phaser.Scene {
             this.startText = this.add.text(400, 500, 'Press SPACE to Start', {
                 fontSize: '24px',
                 fill: '#fff',
-                fontFamily: 'Arial'
+                fontFamily: 'Arial',
+                stroke: '#000',
+                strokeThickness: 4
             }).setOrigin(0.5);
 
             // Make text blink
@@ -153,7 +155,17 @@ export default class TitleScene extends Phaser.Scene {
 
     startGameScene() {
         try {
-            this.scene.start('GameScene', { startMusic: true });
+            // Fade out to black
+            this.cameras.main.fadeOut(1000, 0, 0, 0);
+            
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('GameScene', { 
+                    startMusic: true,
+                    health: 3,
+                    score: 0,
+                    level: 1
+                });
+            });
         } catch (error) {
             console.error('Error starting game scene:', error);
             this.isTransitioning = false;

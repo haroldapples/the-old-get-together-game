@@ -1,25 +1,25 @@
-import playerSprite from '../../assets/herowalking.png';
-import possumSprite from '../../assets/possum.png';
-import heartSprite from '../../assets/heart.png';
-import backgroundImage from '../../assets/background 2.png';
-import burstImage from '../../assets/dead.png';
-import gameMusic from '../../assets/Soundtrack.mp3';
-import bossMusic from '../../assets/boss.mp3';
-import introMusic from '../../assets/intro.mp3';
-import signImage from '../../assets/sign.png';
-import spencersImage from '../../assets/spencers.png';
-import popworksImage from '../../assets/popworks.png';
-import wrapImage from '../../assets/wrap.png';
-import tacoImage from '../../assets/taco.png';
-import baseballImage from '../../assets/baseball.png';
-import boothsImage from '../../assets/booths.png';
-import booth2Image from '../../assets/booth2.png';
-import foxImage from '../../assets/fox.png';
-import foxHurtImage from '../../assets/foxhurt.png';
-import barnImage from '../../assets/barn.png';
-import heroHurtImage from '../../assets/herohurt.png';
-import ticketImage from '../../assets/ticket.png';
-import finalImage from '../../assets/final.png';
+import playerSprite from '../../Assets/herowalking.png';
+import possumSprite from '../../Assets/possum.png';
+import heartSprite from '../../Assets/heart.png';
+import backgroundImage from '../../Assets/background 2.png';
+import burstImage from '../../Assets/dead.png';
+import gameMusic from '../../Assets/Soundtrack.mp3';
+import bossMusic from '../../Assets/boss.mp3';
+import introMusic from '../../Assets/intro.mp3';
+import signImage from '../../Assets/sign.png';
+import spencersImage from '../../Assets/spencers.png';
+import popworksImage from '../../Assets/popworks.png';
+import wrapImage from '../../Assets/wrap.png';
+import tacoImage from '../../Assets/taco.png';
+import baseballImage from '../../Assets/baseball.png';
+import boothsImage from '../../Assets/booths.png';
+import booth2Image from '../../Assets/booth2.png';
+import foxImage from '../../Assets/fox.png';
+import foxHurtImage from '../../Assets/foxhurt.png';
+import barnImage from '../../Assets/barn.png';
+import heroHurtImage from '../../Assets/herohurt.png';
+import ticketImage from '../../Assets/ticket.png';
+import finalImage from '../../Assets/final.png';
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -281,19 +281,14 @@ export default class GameScene extends Phaser.Scene {
                 });
             }
 
-            // Start the game music with a fade in
+            // Set up game music first
             this.gameMusic = this.sound.add('gameMusic', {
                 loop: true,
-                volume: 0
+                volume: 0.7
             });
 
             if (this.shouldStartMusic) {
                 this.gameMusic.play();
-                this.tweens.add({
-                    targets: this.gameMusic,
-                    volume: 0.5,
-                    duration: 1000
-                });
             }
 
             // Create possum group
@@ -747,18 +742,23 @@ export default class GameScene extends Phaser.Scene {
                 });
                 
                 // Fade out current music
-                this.tweens.add({
-                    targets: this.gameMusic,
-                    volume: 0,
-                    duration: 2000,
-                    ease: 'Power2'
-                });
+                if (this.gameMusic && this.gameMusic.isPlaying) {
+                    this.tweens.add({
+                        targets: this.gameMusic,
+                        volume: 0,
+                        duration: 2000,
+                        ease: 'Power2',
+                        onComplete: () => {
+                            this.gameMusic.stop();
+                        }
+                    });
+                }
 
                 // Start boss music
                 this.bossMusicTrack.play();
                 this.tweens.add({
                     targets: this.bossMusicTrack,
-                    volume: 0.5,
+                    volume: 0.7,
                     duration: 2000,
                     ease: 'Power2'
                 });
