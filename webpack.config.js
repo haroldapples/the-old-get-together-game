@@ -7,7 +7,7 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: '/',
+        publicPath: './',
         clean: true
     },
     devServer: {
@@ -38,9 +38,10 @@ module.exports = {
                     transform(content) {
                         return content
                             .toString()
-                            .replace('src="/bundle.js"', 'src="./bundle.js"')
-                            .replace(/src="\/Assets\//g, 'src="./assets/')
-                            .replace(/src="Assets\//g, 'src="./assets/');
+                            .replace(/src="\/bundle\.js"/g, 'src="./bundle.js"')
+                            .replace(/src="\/Assets\//gi, 'src="./assets/')
+                            .replace(/src="Assets\//gi, 'src="./assets/')
+                            .replace(/src="\.\/Assets\//gi, 'src="./assets/');
                     }
                 },
                 { 
@@ -48,7 +49,8 @@ module.exports = {
                     to: 'assets',
                     noErrorOnMissing: true,
                     globOptions: {
-                        caseSensitiveMatch: false
+                        caseSensitiveMatch: false,
+                        ignore: ['**/.DS_Store']
                     }
                 }
             ],
