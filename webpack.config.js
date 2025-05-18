@@ -16,6 +16,7 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
+        publicPath: '/000_Video_Game/',
         assetModuleFilename: 'assets/[name][ext]'
     },
     module: {
