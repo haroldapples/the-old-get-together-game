@@ -16,7 +16,7 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
-        publicPath: '/the-old-get-together-game/',
+        publicPath: './',
         assetModuleFilename: 'assets/[name][ext]'
     },
     module: {
@@ -61,9 +61,9 @@ module.exports = {
                             if (filename) {
                                 const sanitized = sanitizeFilename(filename);
                                 if (filename === 'bundle.js') {
-                                    return `src="/the-old-get-together-game/bundle.js"`;
+                                    return `src="./bundle.js"`;
                                 }
-                                return `src="/the-old-get-together-game/assets/${sanitized}"`;
+                                return `src="./assets/${sanitized}"`;
                             }
                             return match;
                         });
@@ -75,13 +75,6 @@ module.exports = {
                     to: 'assets',
                     globOptions: {
                         ignore: ['**/.DS_Store']
-                    },
-                    transform: (content, absoluteFrom) => {
-                        // Don't transform binary files
-                        if (/\.(png|jpg|jpeg|gif|mp3)$/i.test(absoluteFrom)) {
-                            return content;
-                        }
-                        return content;
                     }
                 }
             ]
