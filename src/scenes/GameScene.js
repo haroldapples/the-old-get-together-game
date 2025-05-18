@@ -782,171 +782,44 @@ export default class GameScene extends Phaser.Scene {
     }
 
     defeatBoss() {
-        if (this.boss.isDead) return; // Prevent multiple calls
-        
-        this.boss.isDead = true;
+        if (this.bossDefeated) return;
         this.bossDefeated = true;
-        
-        // Stop boss movement and music
-        if (this.bossTween) {
-            this.bossTween.stop();
-        }
-        this.boss.setVelocity(0, 0);
-        
-        // Fade out boss music
-        this.tweens.add({
-            targets: this.bossMusicTrack,
-            volume: 0,
-            duration: 2000,
-            ease: 'Power2',
-            onComplete: () => {
-                this.bossMusicTrack.stop();
-            }
-        });
 
-        // Add big score bonus
-        this.score += 1000;
-        this.scoreText.setText('Score: ' + this.score);
-
-        // Create multiple burst effects
-        const createBurst = (delay) => {
-            const burst = this.add.image(
-                this.boss.x + Phaser.Math.Between(-30, 30),
-                this.boss.y + Phaser.Math.Between(-30, 30),
-                'burst'
-            );
-            burst.setScale(0.5);
-            burst.setAlpha(0.7);
-            
+        // Stop boss music and fade in victory music
+        if (this.bossMusic && this.bossMusic.isPlaying) {
             this.tweens.add({
-                targets: burst,
-                scale: 2,
-                alpha: 0,
-                duration: 800,
-                delay: delay,
-                ease: 'Power2',
-                onComplete: () => burst.destroy()
-            });
-        };
-
-        // Color cycling sequence
-        const colors = [0xffff00, 0x00ff00, 0x0000ff, 0xff00ff, 0xff0000];
-        let colorIndex = 0;
-        let cycleCount = 0;
-        
-        // Start color cycling timer
-        const colorTimer = this.time.addEvent({
-            delay: 100,
-            callback: () => {
-                if (this.boss && !this.boss.destroyed) {
-                    this.boss.setTint(colors[colorIndex]);
-                    colorIndex = (colorIndex + 1) % colors.length;
-                    cycleCount++;
-
-                    // Create burst effect every other cycle
-                    if (cycleCount % 2 === 0) {
-                        createBurst(0);
-                    }
-
-                    // After 10 cycles (1 second), start the dissolve
-                    if (cycleCount >= 10) {
-                        colorTimer.destroy();
-                        
-                        // Final burst sequence
-                        for (let i = 0; i < 5; i++) {
-                            createBurst(i * 200);
-                        }
-
-                        // Drop ticket at boss location
-                        const ticket = this.physics.add.sprite(this.boss.x, this.boss.y, 'ticket');
-                        ticket.setScale(0.5);
-                        ticket.setBounce(0.4);
-                        ticket.setCollideWorldBounds(true);
-                        ticket.setVelocityY(-200); // Small upward bounce
-                        
-                        // Add collision with ground for initial bounce
-                        this.physics.add.collider(ticket, this.ground, () => {
-                            // Once it hits the ground, start floating
-                            ticket.setVelocity(0, 0);
-                            ticket.setGravity(0);
-                            
-                            // Single, simple floating animation
-                            this.tweens.add({
-                                targets: ticket,
-                                y: ticket.y - 15,
-                                duration: 1500,
-                                ease: 'Sine.inOut',
-                                yoyo: true,
-                                repeat: -1
-                            });
-                        }, null, this);
-
-                        // Add collision with player
-                        this.physics.add.overlap(this.player, ticket, () => {
-                            if (ticket.active) {
-                                // Freeze the game
-                                this.physics.pause();
-                                this.player.anims.pause();
-                                this.player.setVelocity(0, 0);
-
-                                // Play victory sound
-                                const victorySound = this.sound.add('introMusic', { volume: 0.5 });
-                                victorySound.play();
-
-                                // Create fade out effect
-                                const blackOverlay = this.add.rectangle(
-                                    0,
-                                    0,
-                                    this.game.config.width,
-                                    this.game.config.height,
-                                    0x000000
-                                );
-                                blackOverlay.setOrigin(0, 0);
-                                blackOverlay.setScrollFactor(0);
-                                blackOverlay.setDepth(1000);
-                                blackOverlay.alpha = 0;
-
-                                // Fade to black and transition
-                                this.tweens.add({
-                                    targets: [blackOverlay, ticket],
-                                    alpha: 1,
-                                    duration: 2000,
-                                    ease: 'Power2',
-                                    onComplete: () => {
-                                        // Stop all sounds
-                                        this.sound.stopAll();
-                                        
-                                        // Transition to Level2Scene
-                                        this.scene.start('Level2Scene', {
-                                            health: this.health,
-                                            score: this.score
-                                        });
-                                    }
-                                });
-                            }
-                        }, null, this);
-
-                        // Dissolve boss
-                        this.tweens.add({
-                            targets: this.boss,
-                            scaleX: 1.5,
-                            scaleY: 0,
-                            alpha: 0,
-                            duration: 1000,
-                            ease: 'Power2',
-                            onComplete: () => {
-                                if (this.boss) {
-                                    this.boss.destroy();
-                                }
-                                if (this.bossHealthBar) {
-                                    this.bossHealthBar.destroy();
-                                }
-                            }
-                        });
-                    }
+                targets: this.bossMusic,
+                volume: 0,
+                duration: 1000,
+                onComplete: () => {
+                    this.bossMusic.stop();
                 }
-            },
-            loop: true
+            });
+        }
+
+        // Create victory effects
+        this.createConfetti();
+        
+        // Fade to black after a delay
+        this.time.delayedCall(3000, () => {
+            this.cameras.main.fadeOut(1000, 0, 0, 0);
+            
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                // If this is level 1, go to level 2
+                if (this.level === 1) {
+                    this.scene.start('GameScene', {
+                        startMusic: true,
+                        health: this.health,
+                        score: this.score,
+                        level: 2
+                    });
+                } else {
+                    // If this is level 2, go to end scene
+                    this.scene.start('EndScene', {
+                        score: this.score
+                    });
+                }
+            });
         });
     }
 

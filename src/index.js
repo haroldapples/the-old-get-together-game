@@ -1,4 +1,26 @@
-import config from './config.js';
+import Phaser from 'phaser';
+import TitleScene from './scenes/TitleScene';
+import GameScene from './scenes/GameScene';
+import EndScene from './scenes/EndScene';
 
-// Create game instance when the module loads
-const game = new Phaser.Game(config); 
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    parent: 'game',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: [TitleScene, GameScene, EndScene],
+    pixelArt: true,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    }
+};
+
+new Phaser.Game(config); 
