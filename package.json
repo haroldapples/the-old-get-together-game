@@ -2,6 +2,7 @@
     "name": "the-old-get-together",
     "version": "1.0.0",
     "description": "A 2D platformer game built with Phaser 3",
+    "homepage": "https://haroldapples.github.io/the-old-get-together-game/",
     "main": "src/index.js",
     "scripts": {
         "start": "webpack serve --open",
